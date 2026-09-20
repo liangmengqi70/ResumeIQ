@@ -1,0 +1,64 @@
+/* Shared scale calibrated from the exported Figma Make sources. */
+:root{--font-sans:"Noto Sans SC","Microsoft YaHei","PingFang SC",Arial,sans-serif;--control-height:48px;--control-radius:8px;--form-width:360px}
+body{font-family:var(--font-sans);font-size:14px;line-height:1.5}
+button,input,textarea{font-family:inherit}
+.brand{font-size:18px;font-weight:600;letter-spacing:-.02em}
+.button-small{font-size:14px;font-weight:500;min-height:36px;padding:0 20px}
+.diagnosis-progress li{font-size:14px;font-weight:400}
+.home-main{padding-top:clamp(64px,10vh,100px);padding-bottom:40px}
+.eyebrow{font-size:12.5px;line-height:20px;padding:6px 16px;gap:8px;letter-spacing:.025em}
+.eyebrow span{width:6px;height:6px}
+.hero h1{font-size:52px;line-height:1.18;font-weight:600;letter-spacing:-.02em;margin-top:40px}
+.hero-description{font-size:17px;line-height:1.7;margin-top:24px}
+.start-entry{margin-top:48px}
+.button-hero{min-height:54px;min-width:0;padding:14px 36px;font-size:15px;font-weight:500;gap:10px}
+.button-hero span{font-size:20px;line-height:1}
+.file-hint{font-size:12.5px;margin-top:16px}
+.privacy-note{font-size:14px;line-height:1.6;gap:8px;margin-top:auto;padding-top:56px}
+.privacy-note svg{width:16px;height:16px}
+.login-aside{padding:52px 60px}
+.login-aside>.brand{font-size:15px}
+.resume-illustration{width:min(100%,420px)}
+.login-aside h2{font-size:clamp(22px,2.8vw,34px);letter-spacing:-.03em;margin:24px 0 40px;font-weight:700}
+.aside-caption{font-size:11px}
+.login-panel{padding:60px 40px}
+.login-content>.brand{font-size:16px}
+.login-heading{margin-top:36px;margin-bottom:28px}
+.login-heading h1{font-size:28px;line-height:1.15;letter-spacing:-.03em}
+.login-heading p{font-size:14px;margin-top:6px}
+.login-form input{font-size:15px;padding-right:16px}
+.country-code{font-size:14px}
+.code-button{font-size:13px;min-width:104px}
+.login-submit{font-size:15px}
+.upload-main{width:min(100% - 48px,632px);padding-top:64px}
+.upload-main h1{font-size:40px;font-weight:600;line-height:1.25;letter-spacing:-.025em}
+.upload-description{font-size:16px;line-height:1.625;margin-top:16px}
+.upload-dropzone{margin-top:48px;height:340px;min-height:340px;padding:48px;border-radius:16px;gap:8px;font-size:14px}
+.upload-dropzone strong{font-size:16px;font-weight:500}
+.upload-icon{width:64px;height:64px;border-radius:16px;margin-bottom:12px}
+.upload-icon svg{width:28px;height:28px}
+.upload-feedback{font-size:13px;min-height:48px}
+.upload-footer{padding:20px 24px}
+.upload-footer>div{max-width:632px}
+.upload-back,.upload-next{height:44px;border-radius:12px;font-size:14px;font-weight:500}
+.upload-back{min-width:80px;padding:0 24px}
+.upload-next{min-width:112px;padding:0 24px;gap:8px}
+.upload-next span{font-size:20px}
+/* Wider forms retain their own source widths while reusing the footer. */
+.upload-main:has(textarea):not(:has(input[type=radio])){width:min(100% - 48px,720px)}
+.upload-main:has(textarea):not(:has(input[type=radio])) h1{font-size:36px}
+.upload-page:has(#job-description) .upload-footer>div{max-width:720px}
+.upload-main:has(input[type=radio]){width:min(100% - 48px,680px)}
+.upload-page:has(input[type=radio]) .upload-footer{border-top:0;padding-top:0}
+.upload-page:has(input[type=radio]) .upload-footer>div{max-width:680px}
+@media(max-width:900px){.login-aside{padding:40px 28px}.login-panel{padding:48px 28px}}
+@media(max-width:640px){
+ .brand{font-size:18px}.diagnosis-progress li{font-size:11px}
+ .home-main{padding-top:56px}.hero h1{font-size:38px;margin-top:32px}.hero-description{font-size:16px}
+ .start-entry{margin-top:32px}.privacy-note{font-size:12px;padding-top:48px}
+ .login-panel{padding:40px 24px}.login-heading h1{font-size:28px}
+ .upload-main{padding-top:40px}.upload-main h1{font-size:30px}.upload-description{font-size:14px}
+ .upload-dropzone{margin-top:32px;min-height:300px;height:auto;padding:32px 16px}
+ .upload-main:has(textarea):not(:has(input[type=radio])) h1{font-size:30px}
+}
+.button-arrow,.button-hero>.button-arrow,.upload-next>.button-arrow{display:inline-flex;align-items:center;justify-content:center;flex:0 0 16px;width:16px;height:16px;line-height:0;vertical-align:middle}.button-arrow svg{display:block;width:16px;height:16px;flex:none}
