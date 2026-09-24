@@ -2,9 +2,10 @@ import 'server-only';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { CurrencyCode, EvalRun, ManualReview } from './types';
+import { dataDirectory as appDataDirectory } from '@/lib/data-directory';
 
 type StoreEvent = { type: 'run'; run: EvalRun } | { type: 'review'; runId: string; review: ManualReview };
-const dataDirectory = path.join(process.cwd(), '.data', 'eval-tool');
+const dataDirectory = appDataDirectory('eval-tool');
 const eventsFile = path.join(dataDirectory, 'events.jsonl');
 
 async function events(): Promise<StoreEvent[]> {

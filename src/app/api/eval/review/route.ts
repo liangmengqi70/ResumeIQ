@@ -1,10 +1,12 @@
 import { requireSameOrigin } from '@/lib/auth-policy';
 import { listRuns, saveReview } from '@/eval-tool/store';
 import { scoreKeys, type EvalScore, type ManualReview, type ScoreKey } from '@/eval-tool/types';
+import { evalToolEnabled, evalUnavailable } from '@/eval-tool/access';
 
 export const runtime = 'nodejs';
 
 export async function POST(request: Request) {
+  if (!evalToolEnabled()) return evalUnavailable();
   try {
     requireSameOrigin(request);
     const body = await request.json() as { runId?: string; scores?: Partial<Record<ScoreKey, number>>; notes?: string; failureType?: string; highRisk?: boolean };
@@ -19,4 +21,3 @@ export async function POST(request: Request) {
     return Response.json({ review });
   } catch (error) { return Response.json({ error: error instanceof Error ? error.message : '保存失败' }, { status: 400 }); }
 }
-

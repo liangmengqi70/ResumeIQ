@@ -3,11 +3,13 @@ import { getCase } from '@/eval-tool/cases';
 import { MAX_REPEAT_COUNT } from '@/eval-tool/config';
 import { runEvaluation } from '@/eval-tool/runner';
 import type { ProviderId } from '@/eval-tool/types';
+import { evalToolEnabled, evalUnavailable } from '@/eval-tool/access';
 
 export const runtime = 'nodejs';
 const providers: ProviderId[] = ['openai', 'anthropic', 'deepseek'];
 
 export async function POST(request: Request) {
+  if (!evalToolEnabled()) return evalUnavailable();
   try {
     requireSameOrigin(request);
     const body = await request.json() as { caseId?: string; providers?: ProviderId[]; repeatCount?: number };

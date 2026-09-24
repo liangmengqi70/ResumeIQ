@@ -8,6 +8,8 @@ import { db, transaction } from './db';
 import type { BackgroundAnswers } from './diagnosis-draft';
 import type { DiagnosisReport, Verdict } from './diagnosis-report';
 import type { DiagnosisUsage } from './deepseek-diagnosis';
+import { dataDirectory } from './data-directory';
+import { AuthError } from './auth-policy';
 
 export type DiagnosisOwner = { userId: string | null; guestSessionId: string | null };
 export type StoredDiagnosis = {
@@ -16,6 +18,36 @@ export type StoredDiagnosis = {
   jobDescriptionId: string;
   surveyId: string;
 };
+
+function positiveLimit(name: string, productionDefault: number) {
+  const configured = process.env[name];
+  if (configured === undefined || configured.trim() === '') return process.env.NODE_ENV === 'production' ? productionDefault : 0;
+  const value = Number(configured);
+  return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+}
+
+export async function enforceDiagnosisQuota(owner: DiagnosisOwner) {
+  const globalLimit = positiveLimit('AI_DAILY_GLOBAL_LIMIT', 20);
+  const ownerLimit = positiveLimit('AI_DAILY_OWNER_LIMIT', 3);
+  if (!globalLimit && !ownerLimit) return;
+
+  if (globalLimit) {
+    const [rows] = await db().execute<RowDataPacket[]>(
+      'SELECT COUNT(*) AS total FROM diagnosis_tasks WHERE created_at >= UTC_TIMESTAMP(3) - INTERVAL 24 HOUR',
+    );
+    if (Number(rows[0]?.total || 0) >= globalLimit) throw new AuthError('今日公开体验次数已用完，请稍后再试。', 429);
+  }
+
+  if (ownerLimit) {
+    const field = owner.userId ? 'user_id' : 'guest_session_id';
+    const value = owner.userId || owner.guestSessionId;
+    const [rows] = await db().execute<RowDataPacket[]>(
+      `SELECT COUNT(*) AS total FROM diagnosis_tasks WHERE ${field} = ? AND created_at >= UTC_TIMESTAMP(3) - INTERVAL 24 HOUR`,
+      [value],
+    );
+    if (Number(rows[0]?.total || 0) >= ownerLimit) throw new AuthError('你今天的体验次数已用完，请明天再试。', 429);
+  }
+}
 
 const retentionMs = 10 * 24 * 60 * 60 * 1000;
 
@@ -35,11 +67,11 @@ export async function storeDiagnosisInputs(input: {
   background: BackgroundAnswers;
 }) {
   const extension = input.file.name.split('.').pop()?.toLowerCase() || '';
-  const storageDirectory = path.join(process.cwd(), '.data', 'resumes');
+  const storageDirectory = dataDirectory('resumes');
   const storageName = `${randomUUID()}.${extension}`;
   await mkdir(storageDirectory, { recursive: true });
-  await writeFile(path.join(storageDirectory, storageName), Buffer.from(await input.file.arrayBuffer()));
-  const storageKey = `.data/resumes/${storageName}`;
+  await writeFile(path.join(/*turbopackIgnore: true*/ storageDirectory, storageName), Buffer.from(await input.file.arrayBuffer()));
+  const storageKey = path.posix.join('resumes', storageName);
   const [userId, guestSessionId, expiresAt] = ownerValues(input.owner);
 
   return transaction(async connection => {

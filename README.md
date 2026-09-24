@@ -46,6 +46,28 @@ ResumeIQ 是结合简历、目标岗位 JD 和求职背景生成诊断报告的�
 
 安装方式参考 [Next.js 官方文档](https://nextjs.org/docs/app/getting-started/installation)。
 
+## Railway 公网部署
+
+仓库已包含 `railway.json`、`/api/health` 健康检查和幂等的 `npm run db:init`。公开部署由一个 ResumeIQ Web 服务、一个 Railway MySQL 服务和一个挂载到 `/app/.data` 的持久卷组成。
+
+1. 在 Railway 选择 **New Project → Deploy from GitHub repo**，连接此仓库。
+2. 在同一个 Project 添加 **MySQL** 服务。
+3. 在 ResumeIQ 服务添加以下变量引用（`MySQL` 为数据库服务名）：
+
+```env
+MYSQLHOST=${{MySQL.MYSQLHOST}}
+MYSQLPORT=${{MySQL.MYSQLPORT}}
+MYSQLDATABASE=${{MySQL.MYSQLDATABASE}}
+MYSQLUSER=${{MySQL.MYSQLUSER}}
+MYSQLPASSWORD=${{MySQL.MYSQLPASSWORD}}
+```
+
+4. 添加应用变量：`DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL`、`DEEPSEEK_BASE_URL`、`RESUMEIQ_DATA_DIR=/app/.data`、`AI_DAILY_GLOBAL_LIMIT=20`、`AI_DAILY_OWNER_LIMIT=3`、`EVAL_TOOL_ENABLED=false`。API Key 只放 Railway Variables。
+5. 给 ResumeIQ 服务添加 Volume，Mount Path 填 `/app/.data`。
+6. 在 **Settings → Networking → Public Networking** 生成域名。生成后可把 `APP_ORIGIN` 设为完整的 `https://...up.railway.app` 地址。
+
+游客可以从首页直接进入上传和 AI 诊断流程。若要开放手机号登录，另将 `AUTH_SMS_MODE=tencent` 并配置 `.env.example` 中的腾讯云短信变量；未配置真实短信时，公开环境不会接受本地测试验证码。生产环境默认关闭内部 `/eval` 工具。
+
 ## LLM Model Eval Tool V0.2
 
 内部评测工具位于 `/eval`，与正式诊断流程分离。Case 数据位于 `src/eval-tool/data/cases.json`，运行记录以 JSONL 事件写入 `.data/eval-tool/events.jsonl`，该目录不会提交到 Git。

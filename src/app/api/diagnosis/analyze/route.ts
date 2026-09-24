@@ -3,7 +3,7 @@ import { extractResumeText, ResumeTextError } from '@/lib/resume-text';
 import type { BackgroundAnswers } from '@/lib/diagnosis-draft';
 import { currentOwner } from '@/lib/auth';
 import { AuthError } from '@/lib/auth-policy';
-import { completeDiagnosis, failDiagnosis, recordFailedUsage, storeDiagnosisInputs, type StoredDiagnosis } from '@/lib/diagnosis-persistence';
+import { completeDiagnosis, enforceDiagnosisQuota, failDiagnosis, recordFailedUsage, storeDiagnosisInputs, type StoredDiagnosis } from '@/lib/diagnosis-persistence';
 
 export const runtime = 'nodejs';
 
@@ -28,6 +28,7 @@ export async function POST(request: Request) {
   try {
     const owner = await currentOwner();
     if (!owner) throw new AuthError('登录状态已失效，请返回首页重新开始。', 401);
+    await enforceDiagnosisQuota(owner);
     const form = await request.formData();
     const file = form.get('resume');
     const jd = typeof form.get('jd') === 'string' ? String(form.get('jd')).trim().slice(0, 5_000) : '';

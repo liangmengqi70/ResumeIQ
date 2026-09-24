@@ -6,6 +6,7 @@ import { currentUser } from '@/lib/auth';
 import { mutation, jsonBody } from '@/lib/api';
 import { AuthError } from '@/lib/auth-policy';
 import { db } from '@/lib/db';
+import { dataDirectory } from '@/lib/data-directory';
 
 export async function PATCH(request: Request) {
   return mutation(request, async () => {
@@ -22,7 +23,7 @@ export async function PATCH(request: Request) {
       try { bytes = await sharp(Buffer.from(data.avatar.split(',')[1], 'base64'), { limitInputPixels: 16000000 }).resize(256, 256, { fit: 'cover' }).png().toBuffer(); }
       catch { throw new AuthError('图片无法读取，请重新选择'); }
       const name = randomUUID() + '.png';
-      const directory = path.join(process.cwd(), '.data', 'avatars');
+      const directory = dataDirectory('avatars');
       await mkdir(directory, { recursive: true });
       await writeFile(path.join(directory, name), bytes);
       avatarUrl = '/api/profile/avatar?file=' + name;

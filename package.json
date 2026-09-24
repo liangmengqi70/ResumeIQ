@@ -5,10 +5,11 @@
   "scripts": {
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
-    "start": "next start --hostname 127.0.0.1",
+    "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/*.test.ts",
-    "db:inspect": "node --env-file=.env.local scripts/inspect-db.mjs"
+    "db:inspect": "node --env-file=.env.local scripts/inspect-db.mjs",
+    "db:init": "node scripts/init-db.mjs"
   },
   "dependencies": {
     "mammoth": "^1.12.3",
