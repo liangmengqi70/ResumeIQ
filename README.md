@@ -16,6 +16,8 @@ ResumeIQ 是结合简历、目标岗位 JD 和求职背景生成诊断报告的�
 
 本地可使用 `AUTH_SMS_MODE=development` 和 `AUTH_DEV_CODE`。真实短信使用腾讯云短信：将 `AUTH_SMS_MODE` 改为 `tencent`，并配置 `TENCENTCLOUD_SECRET_ID`、`TENCENTCLOUD_SECRET_KEY`、`TENCENT_SMS_SDK_APP_ID`、`TENCENT_SMS_SIGN_NAME` 和 `TENCENT_SMS_TEMPLATE_ID`。短信模板参数 1 为验证码，参数 2 为有效分钟数。密钥只能写在 `.env.local` 或部署平台环境变量中。
 
+作品集演示环境可设置 `GUEST_REPORT_ACCESS=full`，允许游客在当前会话中直接查看完整报告。正式上线时改为 `GUEST_REPORT_ACCESS=login_required` 或删除该变量，即恢复“登录后查看完整报告”。
+
 ## 已实现功能
 
 - 首页与双栏登录页，移动端适配；共用文字品牌、按钮、60px 表单控件、12px 圆角及 8px 间距刻度。

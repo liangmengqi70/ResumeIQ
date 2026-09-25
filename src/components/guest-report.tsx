@@ -6,7 +6,7 @@ import { DiagnosticReport } from './diagnostic-report';
 import { loadDiagnosisReport, type DiagnosisReport } from '@/lib/diagnosis-report';
 import styles from './guest-report.module.css';
 
-export function GuestReport() {
+export function GuestReport({ allowGuestFullReport = false }: { allowGuestFullReport?: boolean }) {
   const router = useRouter();
   const dialog = useRef<HTMLDialogElement>(null);
   const unlock = useRef<HTMLButtonElement>(null);
@@ -27,18 +27,19 @@ export function GuestReport() {
       if (!active) return;
       setSignedIn(Boolean(data.user));
       if (data.user) void recordView(storedReport);
-      else dialog.current?.showModal();
-    }).catch(() => { if (active) dialog.current?.showModal(); });
+      else if (!allowGuestFullReport) dialog.current?.showModal();
+    }).catch(() => { if (active && !allowGuestFullReport) dialog.current?.showModal(); });
     return () => { active = false; dialog.current?.close(); };
-  }, [router]);
+  }, [allowGuestFullReport, router]);
   function close() { dialog.current?.close(); setLoginOpen(false); unlock.current?.focus({ preventScroll: true }); }
   if (!report) return <main className={styles.main} aria-busy="true" />;
-  return <main className={`${styles.main}${signedIn ? ` ${styles.unlockedMain}` : ''}`}>
-    {!signedIn && <div className={styles.heading}><div><h1>AI 诊断报告</h1><p>分析完成 · 报告将在 10 天内为你保留</p></div><span className={styles.badge}><i />待解锁</span></div>}
+  const canViewReport = signedIn || allowGuestFullReport;
+  return <main className={`${styles.main}${canViewReport ? ` ${styles.unlockedMain}` : ''}`}>
+    {!canViewReport && <div className={styles.heading}><div><h1>AI 诊断报告</h1><p>分析完成 · 报告将在 10 天内为你保留</p></div><span className={styles.badge}><i />待解锁</span></div>}
     <div className={styles.reportBody}>
-    <div className={signedIn ? undefined : styles.lockedReport} aria-hidden={!signedIn} inert={!signedIn}><DiagnosticReport report={report} showIntro={signedIn} /></div>
+    <div className={canViewReport ? undefined : styles.lockedReport} aria-hidden={!canViewReport} inert={!canViewReport}><DiagnosticReport report={report} showIntro={canViewReport} /></div>
     <div className={styles.unlock}>
-      {!signedIn && <><span className={styles.lock} aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="12" rx="1.5" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span><button ref={unlock} className={`button upload-next ${styles.primary}`} onClick={() => { setLoginOpen(true); dialog.current?.showModal(); }}>登录查看完整报告</button></>}
+      {!canViewReport && <><span className={styles.lock} aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="12" rx="1.5" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span><button ref={unlock} className={`button upload-next ${styles.primary}`} onClick={() => { setLoginOpen(true); dialog.current?.showModal(); }}>登录查看完整报告</button></>}
     </div>
     </div>
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="report-dialog-title" aria-describedby="report-dialog-description" onCancel={event => { event.preventDefault(); close(); }}>
