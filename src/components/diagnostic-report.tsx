@@ -21,7 +21,7 @@ function ProblemCard({ problem, initiallyOpen }: { problem: DiagnosisProblem; in
       <div className={styles.comparison}><div><h3>简历原文</h3><p>“{problem.resumeQuote}”</p></div><div><h3>JD 要求</h3><p>“{problem.jdRequirement}”</p></div></div>
       <div className={styles.explanation}><h3>为什么会影响初筛</h3><p>{problem.whyMatters}</p></div>
       <div className={styles.explanation}><h3>具体修改建议</h3><p>{problem.suggestion}</p></div>
-      <div className={styles.rewrite}><div><h3>参考改写</h3><span>仅供参考</span></div><p>{problem.rewrite}</p></div>
+      {problem.rewrite.trim() && <div className={styles.rewrite}><div><h3>参考改写</h3><span>仅供参考</span></div><p>{problem.rewrite}</p></div>}
     </div>}
   </article>;
 }

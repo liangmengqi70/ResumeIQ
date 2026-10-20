@@ -11,7 +11,14 @@ export type DiagnosisProblem = {
   whyMatters: string;
   suggestion: string;
   rewrite: string;
+  type?: 'fixable' | 'hard';
+  category?: 'match' | 'expression';
+  actionLine?: string;
 };
+
+export type DiagnosisNextStep = { title: string; detail: string };
+export type DiagnosisAlternativeRole = { role: string; reason: string; evidence: string };
+export type DiagnosisAnswer = { question: string; reply: string };
 
 export type DiagnosisStrength = { id: string; title: string; detail: string };
 
@@ -23,6 +30,9 @@ export type DiagnosisReport = {
   verdictSummary: string;
   problems: DiagnosisProblem[];
   strengths: DiagnosisStrength[];
+  nextSteps?: DiagnosisNextStep[];
+  alternativeRoles?: DiagnosisAlternativeRole[];
+  answer?: DiagnosisAnswer | null;
 };
 
 export type DiagnosisHistoryRecord = {
