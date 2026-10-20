@@ -157,9 +157,26 @@ function ownerCondition(owner: DiagnosisOwner): { sql: string; params: string[] 
   throw new AuthError('请先登录', 401);
 }
 
+// v2 报告的下一步、岗位方向和回答只保存在完整模型输出中；字段缺失或格式不符时忽略，按旧报告显示。
+function v2Extras(raw: unknown): Pick<DiagnosisReport, 'nextSteps' | 'alternativeRoles' | 'answer'> {
+  let value: unknown = raw;
+  if (typeof value === 'string') { try { value = JSON.parse(value); } catch { return {}; } }
+  if (!value || typeof value !== 'object') return {};
+  const output = value as Record<string, unknown>;
+  const text = (item: unknown) => typeof item === 'string' && item.trim().length > 0;
+  const extras: Pick<DiagnosisReport, 'nextSteps' | 'alternativeRoles' | 'answer'> = {};
+  const steps = jsonArray(output.nextSteps).filter(item => item && text(item.title) && text(item.detail));
+  if (steps.length) extras.nextSteps = steps.map(item => ({ title: item.title, detail: item.detail }));
+  const roles = jsonArray(output.alternativeRoles).filter(item => item && text(item.role) && text(item.reason) && text(item.evidence));
+  if (roles.length) extras.alternativeRoles = roles.map(item => ({ role: item.role, reason: item.reason, evidence: item.evidence }));
+  const answer = output.answer as Record<string, unknown> | null | undefined;
+  if (answer && text(answer.question) && text(answer.reply)) extras.answer = { question: answer.question as string, reply: answer.reply as string };
+  return extras;
+}
+
 export async function diagnosisHistory(owner: DiagnosisOwner) {
   const condition = ownerCondition(owner);
-  const [rows] = await db().execute<RowDataPacket[]>(`SELECT r.id AS report_id, r.conclusion, r.conclusion_summary, r.issues, r.strengths, r.generated_at,
+  const [rows] = await db().execute<RowDataPacket[]>(`SELECT r.id AS report_id, r.conclusion, r.conclusion_summary, r.issues, r.strengths, r.raw_model_output, r.generated_at,
     t.completed_at, f.original_filename, f.uploaded_at, j.job_title
     FROM diagnosis_reports r
     JOIN diagnosis_tasks t ON t.id = r.task_id
@@ -176,6 +193,7 @@ export async function diagnosisHistory(owner: DiagnosisOwner) {
       verdictSummary: String(row.conclusion_summary),
       problems: jsonArray(row.issues) as DiagnosisReport['problems'],
       strengths: jsonArray(row.strengths) as DiagnosisReport['strengths'],
+      ...v2Extras(row.raw_model_output),
     };
     return {
       id: report.id,

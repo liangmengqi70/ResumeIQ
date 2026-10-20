@@ -10,3 +10,12 @@
 @media(max-width:640px){.report{padding:32px 20px 56px}.intro h1{font-size:24px}.section{margin-top:40px}.sectionHeading{align-items:flex-start;flex-direction:column;gap:4px}.statuses{gap:18px}.comparison{grid-template-columns:1fr}.problemToggle,.problemDetails{padding-left:16px;padding-right:16px}.strengths article{padding:14px 16px}}
 @media(prefers-reduced-motion:reduce){.problemToggle svg,.home{transition:none}.home:hover{transform:none}}
 .explanation h3{color:#111110}
+.impact.hard{color:#55544c;background:#e7e7e2}.hardProblem,.hardProblem .problemToggle{background:#f5f5f2}.hardProblem .problemToggle:hover{background:#efefeb}
+.actionLine{color:#111110!important;font-size:13px;line-height:1.65}
+.steps{display:grid;gap:10px;margin:16px 0 0;padding:0;list-style:none}.steps li{display:flex;align-items:flex-start;gap:12px;padding:16px 20px;border:1px solid #e4e4e0;border-radius:8px;background:#fff}.steps strong{display:block;font-size:15px;line-height:1.5}.steps p{margin:4px 0 0;color:#55544c;font-size:13px;line-height:1.65}
+.stepNumber{display:grid;place-items:center;flex:none;width:24px;height:24px;border-radius:50%;background:#111110;color:#fff;font-size:13px;font-weight:700}
+.steps .firstStep{border-color:#111110;background:#111110;color:#fff}.steps .firstStep p{color:#d6d5cf}.steps .firstStep .stepNumber{background:#fff;color:#111110}
+.answer{margin-top:16px;padding:16px 20px;border:1px solid #e4e4e0;border-radius:8px;background:#fff}.answer p{margin:0;color:#33332e;font-size:14px;line-height:1.75}.answer .question{margin-bottom:8px;color:#6b6a60;font-size:13px}.answer .question span{color:#33332e}
+.sectionNote{margin:8px 0 0;color:#6b6a60;font-size:13px;line-height:1.65}
+.roles{display:grid;gap:10px;margin-top:16px}.roles article{padding:16px 20px;border:1px solid #e4e4e0;border-radius:8px;background:#fff}.roles h3{margin:0;font-size:15px;line-height:1.5}.roles p{margin:4px 0 0;color:#55544c;font-size:13px;line-height:1.65}.roles .evidence{color:#6b6a60}
+@media(max-width:640px){.steps li,.answer,.roles article{padding:14px 16px}}
