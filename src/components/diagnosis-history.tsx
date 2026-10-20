@@ -31,6 +31,7 @@ export function DiagnosisHistory() {
   const router = useRouter();
   const [records, setRecords] = useState<DiagnosisHistoryRecord[]>([]);
   const [ready, setReady] = useState(false);
+  const [guest, setGuest] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<DiagnosisHistoryRecord | null>(null);
   const [toast, setToast] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -41,12 +42,12 @@ export function DiagnosisHistory() {
     fetch('/api/auth/me').then(response => response.json())
       .then(async auth => {
         if (!active) return;
-        if (!auth.user) { router.replace('/login'); return; }
-        setDiagnosisHistoryOwner(auth.user.id);
+        if (!auth.user && !auth.guest) { router.replace('/login'); return; }
+        if (auth.user) setDiagnosisHistoryOwner(auth.user.id);
         const response = await fetch('/api/diagnosis/history', { cache: 'no-store' });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || '历史记录加载失败');
-        if (active) { setRecords(data.records || []); setReady(true); }
+        if (active) { setRecords(data.records || []); setGuest(!auth.user); setReady(true); }
       }).catch(() => { if (active) router.replace('/login'); });
     return () => { active = false; if (toastTimer.current) clearTimeout(toastTimer.current); };
   }, [router]);
@@ -94,6 +95,7 @@ export function DiagnosisHistory() {
         <h1>历史记录</h1>
         <p>查看你已完成的简历诊断报告</p>
         <span>共 {records.length} 条诊断记录</span>
+        {guest && <p className={styles.guestNotice}>游客记录仅保留 24 小时，<Link href="/login">登录</Link>后可长期保存</p>}
       </header>
 
       {records.length > 0 ? <div className={styles.list}>

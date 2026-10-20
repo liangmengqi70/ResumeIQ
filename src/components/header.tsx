@@ -8,6 +8,7 @@ import { setDiagnosisHistoryOwner } from '@/lib/diagnosis-report';
 type User = ProfileUser;
 export function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const [guest, setGuest] = useState(false);
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -15,7 +16,7 @@ export function Header() {
   const [notice, setNotice] = useState('');
   const menu = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    function refreshUser() { fetch('/api/auth/me').then(r => r.json()).then(d => { setDiagnosisHistoryOwner(d.user?.id ?? null); setUser(d.user ?? null); }).catch(() => {}); }
+    function refreshUser() { fetch('/api/auth/me').then(r => r.json()).then(d => { setDiagnosisHistoryOwner(d.user?.id ?? null); setUser(d.user ?? null); setGuest(!d.user && Boolean(d.guest)); }).catch(() => {}); }
     refreshUser();
     window.addEventListener('resumeiq:auth-changed', refreshUser);
     function dismiss(e: MouseEvent) { if (!menu.current?.contains(e.target as Node)) setOpen(false); }
@@ -37,6 +38,6 @@ export function Header() {
       <button className={`${styles.item} ${styles.logout}`} onClick={logout} disabled={busy}><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4M9 12h12m-5-5 5 5-5 5" /></svg><span>{busy ? '正在退出…' : '退出登录'}</span></button>
       {notice && <p className={styles.feedback} role="status">{notice}</p>}{error && <p className={`${styles.feedback} ${styles.logout}`} role="alert">{error}</p>}
     </div>}
-  </div> : <Link className="button button-small" href="/login">登录</Link>}{profileOpen && user && <ProfileDrawer user={user} onClose={() => setProfileOpen(false)} onSaved={setUser} />}</header>;
+  </div> : <div className={styles.guestActions}>{guest && <Link className={styles.historyLink} href="/history">历史记录</Link>}<Link className="button button-small" href="/login">登录</Link></div>}{profileOpen && user && <ProfileDrawer user={user} onClose={() => setProfileOpen(false)} onSaved={setUser} />}</header>;
 }
 

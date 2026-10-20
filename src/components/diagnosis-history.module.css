@@ -11,3 +11,4 @@
 @media(max-width:700px){.main{padding:28px 20px 56px}.card{align-items:flex-start;gap:14px;padding:18px}.fileIcon{width:36px;height:36px}.actions{width:100%;flex-direction:row;align-items:center;justify-content:flex-end}.card{flex-wrap:wrap}.info{flex-basis:calc(100% - 50px)}.view{padding:8px 16px}.dialog{padding:26px 22px 22px}}
 @media(prefers-reduced-motion:reduce){.back,.card,.view,.delete,.start,.toast{transition:none}.view:hover,.start:hover{transform:none}}
 .back{gap:5px}
+.guestNotice{margin:12px 0 0;color:#888;font-size:13px;line-height:1.6}.guestNotice a{color:#111;text-decoration:underline;text-underline-offset:3px}

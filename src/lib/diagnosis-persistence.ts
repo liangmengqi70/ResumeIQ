@@ -147,15 +147,25 @@ function reportVerdict(value: string): Verdict {
   return value === 'recommended' ? 'recommended' : value === 'concerned' ? 'concern' : 'rejected';
 }
 
-export async function diagnosisHistory(userId: string) {
+// Guest records are scoped to their own unexpired guest session and never include bound or account rows.
+function ownerCondition(owner: DiagnosisOwner): { sql: string; params: string[] } {
+  if (owner.userId) return { sql: 't.user_id = ?', params: [owner.userId] };
+  if (owner.guestSessionId) {
+    return { sql: 't.guest_session_id = ? AND t.user_id IS NULL AND (t.expires_at IS NULL OR t.expires_at > ?)', params: [owner.guestSessionId, mysqlDate(new Date())] };
+  }
+  throw new AuthError('请先登录', 401);
+}
+
+export async function diagnosisHistory(owner: DiagnosisOwner) {
+  const condition = ownerCondition(owner);
   const [rows] = await db().execute<RowDataPacket[]>(`SELECT r.id AS report_id, r.conclusion, r.conclusion_summary, r.issues, r.strengths, r.generated_at,
     t.completed_at, f.original_filename, f.uploaded_at, j.job_title
     FROM diagnosis_reports r
     JOIN diagnosis_tasks t ON t.id = r.task_id
     JOIN resume_files f ON f.id = t.resume_file_id
     JOIN job_descriptions j ON j.id = t.job_description_id
-    WHERE t.user_id = ? AND t.status = 'succeeded' AND t.deleted_at IS NULL AND r.deleted_at IS NULL AND f.deleted_at IS NULL AND j.deleted_at IS NULL
-    ORDER BY t.completed_at DESC`, [userId]);
+    WHERE ${condition.sql} AND t.status = 'succeeded' AND t.deleted_at IS NULL AND r.deleted_at IS NULL AND f.deleted_at IS NULL AND j.deleted_at IS NULL
+    ORDER BY t.completed_at DESC`, condition.params);
   return rows.map(row => {
     const report: DiagnosisReport = {
       id: `db-report-${row.report_id}`,
@@ -176,13 +186,14 @@ export async function diagnosisHistory(userId: string) {
   });
 }
 
-export async function deleteStoredDiagnosis(userId: string, reportId: string) {
+export async function deleteStoredDiagnosis(owner: DiagnosisOwner, reportId: string) {
   const match = /^db-report-(\d+)$/.exec(reportId);
   if (!match) return false;
+  const condition = ownerCondition(owner);
   return transaction(async connection => {
     const [rows] = await connection.execute<RowDataPacket[]>(`SELECT r.id AS report_id, t.id AS task_id, t.resume_file_id, t.job_description_id, t.background_survey_id
       FROM diagnosis_reports r JOIN diagnosis_tasks t ON t.id = r.task_id
-      WHERE r.id = ? AND t.user_id = ? AND r.deleted_at IS NULL FOR UPDATE`, [match[1], userId]);
+      WHERE r.id = ? AND ${condition.sql} AND r.deleted_at IS NULL FOR UPDATE`, [match[1], ...condition.params]);
     if (!rows[0]) return false;
     const row = rows[0];
     const deletedAt = mysqlDate(new Date());
