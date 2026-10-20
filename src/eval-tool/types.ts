@@ -36,7 +36,17 @@ export type EvalProblem = {
   whyMatters: string;
   suggestion: string;
   rewrite: string;
+  /** v2：fixable 可通过改简历解决；hard 为学历、年限等硬性门槛，rewrite 可为空。旧报告缺省视为 fixable。 */
+  type?: 'fixable' | 'hard';
+  /** v2：match 岗位匹配；expression 经历表达。 */
+  category?: 'match' | 'expression';
+  /** v2：折叠卡片上显示的一句话行动，如「压缩成 3 行」。 */
+  actionLine?: string;
 };
+
+export type EvalNextStep = { title: string; detail: string };
+export type EvalAlternativeRole = { role: string; reason: string; evidence: string };
+export type EvalAnswer = { question: string; reply: string };
 
 export type EvalOutput = {
   targetRole: string;
@@ -44,6 +54,10 @@ export type EvalOutput = {
   verdictSummary: string;
   problems: EvalProblem[];
   strengths: Array<{ id: string; title: string; detail: string }>;
+  /** v2 新增字段，旧报告与评测工具 v0.2 输出中可缺省。 */
+  nextSteps?: EvalNextStep[];
+  alternativeRoles?: EvalAlternativeRole[];
+  answer?: EvalAnswer | null;
 };
 
 export type ModelConfig = {

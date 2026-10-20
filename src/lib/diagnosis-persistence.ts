@@ -9,6 +9,7 @@ import type { BackgroundAnswers } from './diagnosis-draft';
 import type { DiagnosisReport, Verdict } from './diagnosis-report';
 import type { DiagnosisUsage } from './deepseek-diagnosis';
 import { dataDirectory } from './data-directory';
+import { DIAGNOSIS_PROMPT_VERSION } from './diagnosis-prompt-version';
 import { AuthError } from './auth-policy';
 
 export type DiagnosisOwner = { userId: string | null; guestSessionId: string | null };
@@ -89,7 +90,7 @@ export async function storeDiagnosisInputs(input: {
     );
     const [task] = await connection.execute<ResultSetHeader>(
       'INSERT INTO diagnosis_tasks (user_id, guest_session_id, resume_file_id, job_description_id, background_survey_id, idempotency_key, status, model_name, prompt_version, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [userId, guestSessionId, resume.insertId, jd.insertId, survey.insertId, randomUUID(), 'processing', process.env.DEEPSEEK_MODEL?.trim() || 'deepseek-v4-pro', 'resumeiq-diagnosis-v1', expiresAt],
+      [userId, guestSessionId, resume.insertId, jd.insertId, survey.insertId, randomUUID(), 'processing', process.env.DEEPSEEK_MODEL?.trim() || 'deepseek-v4-pro', DIAGNOSIS_PROMPT_VERSION, expiresAt],
     );
     return { taskId: String(task.insertId), resumeId: String(resume.insertId), jobDescriptionId: String(jd.insertId), surveyId: String(survey.insertId) } satisfies StoredDiagnosis;
   });
